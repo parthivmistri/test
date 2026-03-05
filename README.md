@@ -1,4 +1,4 @@
-# Loco Operator Integration API Documentation
+# Loco Operator Integration Documentation
 
 **Document Version:** 3.0  
 **Last Updated:** March 2026  
@@ -13,14 +13,13 @@
 | **[1. Executive Summary](#1-executive-summary)** | Overview of integration capabilities and workflow |
 | **[2. Loco Drops / Rewards](#2-loco-drops--rewards)** | Integration guide for Drops and Quest rewards |
 | └─ [2.1 Feature Overview](#21-feature-overview) | What are Loco Drops and Rewards |
-| └─ [2.2 Redirection Management](#22-redirection-management) | User redirect URL configuration |
-| └─ [2.3 User Management APIs](#23-user-management-apis) | Step-by-step API integration workflow |
+| └─ [2.2 Integration Workflow](#22-integration-workflow) | High level Integration steps for Loco Drops / Rewards |
+| └─ [2.3 API Integration Steps](#23-api-integration-steps) | Step-by-step API integration workflow |
 | **[3. Loco Battles](#3-loco-battles)** | Integration guide for tournament features |
 | └─ [3.1 Feature Overview](#31-feature-overview) | What are Loco Battles |
-| └─ [3.2 Redirection Management](#32-redirection-management) | Tournament redirect configuration |
-| └─ [3.3 User Management APIs](#33-user-management-apis) | API requirements for Battles |
+| └─ [3.2 Integration Workflow](#32-integration-workflow) | High level Integration steps for Tournament |
+| └─ [3.3 API Integration Steps](#33-api-integration-steps) | Step-by-step API integration workflow |
 | └─ [3.4 Tournament APIs](#34-tournament-apis) | Operator-hosted tournament endpoints |
-| **[4. Appendices](#4-appendices)** | Reference materials and conventions |
 
 ---
 
@@ -77,12 +76,42 @@ Loco Drops are real-time bonus rewards triggered by streamers during live broadc
 
 ---
 
-<a name="22-redirection-management"></a>
-### 2.2 Redirection Management
+<a name="22-integration-workflow"></a>
+### 2.2 Integration Workflow
+
+The Drops/Rewards integration follows a 4-step workflow:
+
+```
+Step 1: User clicks Drop on Loco
+   ↓
+Step 2: Loco redirects user to Operator platform
+   ↓
+Step 3: Operator fetches user details from Loco for login/signup
+   ↓
+Step 4: Operator links account and notifies Loco of workflow status
+```
+
+---
+
+<a name="23-api-integration-steps"></a>
+### 2.3 API Integration Steps
+
+#### Step 1: User Redirection
 
 **Overview:**
 
 The operator must expose a **user-facing redirect URL** that Loco will use to redirect users from the Loco platform. This URL must accept specific query parameters, validate the URL, and handle user onboarding or reward fulfillment.
+
+**What happens:**
+1. User clicks on a Drop/Reward on Loco platform
+2. Loco generates a redirect URL
+3. User is redirected to operator's platform
+
+**Operator must:**
+1. Accept the redirect URL
+2. Extract user information from URL parameters
+3. Proceed to Step 2
+
 
 #### Redirect URL Format
 
@@ -105,49 +134,7 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 | sig | `string` | ✅ Yes | HMAC-SHA256 signature for request validation |
 
 > **NOTE:**  
-> For Drops/Rewards integrations, the `op_type` parameter will have values such as `"bonus"`, and `op_type_id` will correspond to the specific reward bundle or quest identifier.
-
----
-
-<a name="23-user-management-apis"></a>
-### 2.3 User Management APIs
-
-**Authentication:** Use Loco-provided bearer token in `Authorization` header  
-**Architecture Diagram:** [High level Account linking and bonus distribution flow](https://i.ibb.co/Kj3q8z6X/image-3.png)  
-**Entity Diagram:** [Entity Relationship Overview](https://i.ibb.co/5gqwT0Kp/image-7.png)
-
-#### Integration Workflow
-
-The Drops/Rewards integration follows a 4-step workflow:
-
-```
-Step 1: User clicks Drop on Loco
-   ↓
-Step 2: Loco redirects user to Operator platform (with signed URL)
-   ↓
-Step 3: Operator validates signature and fetches user details from Loco
-   ↓
-Step 4: Operator links account and notifies Loco of workflow status
-```
-
----
-
-#### Step 1: User Redirection
-
-**Who implements:** Loco generates, Operator consumes
-
-**What happens:**
-- User clicks on a Drop/Reward on Loco platform
-- Loco generates a redirect URL (format defined in Section 2.2)
-- User is redirected to operator's platform
-
-**Operator must:**
-1. Accept the redirect URL
-3. Extract user information from URL parameters
-4. Proceed to Step 2
-
-> **NOTE:**  
-> For Drops/Rewards integrations, `op_type` will be `"bonus"` or `"loco_link_account"`, and `op_type_id` corresponds to the specific reward identifier. These values are used for tracking and must be passed back to Loco in Step 4.
+> For Drops/Rewards integrations, `op_type` will be `"bonus"` or `"loco_link_account"`, and `op_type_id` corresponds to the specific reward identifier. These values along with `txn_id` are used for tracking and must be passed back to Loco in Step 4.
 
 ---
 
@@ -284,10 +271,8 @@ Step 4: Operator links account and notifies Loco of workflow status
 
 ##### Implementation Notes
 
-- Idempotent operation: Duplicate requests with same `loco_txn_id` return success
 - Once linked, accounts cannot be unlinked without support intervention
 - `is_new_signup` helps track user acquisition vs retention metrics
-- `timestamp` must be in ISO 8601 format with timezone
 
 ---
 
@@ -400,56 +385,16 @@ Loco Battles enable operators to run tournaments that are discoverable within th
       <em>User clicks "Join Tournament" and is redirected to operator's tournament page</em>
     </td>
     <td align="center">
-      <strong>Step 3: User Participates</strong><br/>
+      <strong>Step 3: User articipates</strong><br/>
       <em>User participates in tournament on operator platform; leaderboard updates are synced back to Loco</em>
     </td>
   </tr>
 </table>
 
-**Integration Architecture:**
-
-**First-Time User Journey:** [Tournament Join Flow (Non-Linked User)](https://i.ibb.co/pvhpHn5V/image-4.png)  
-**Returning User Journey:** [Tournament Join Flow (Linked User)](https://i.ibb.co/CpbvS2fg/image-5.png)  
-**System Integration Architecture:** [Tournament Integration Flow](https://i.ibb.co/Pzxqnx7b/image-6.png)
-
 ---
 
-<a name="32-redirection-management"></a>
-### 3.2 Redirection Management
-
-**Overview:**
-
-Similar to Drops/Rewards, the operator must expose a **user-facing redirect URL** for Battles. When a user clicks "Join Tournament" on Loco, they are redirected to the operator's platform with tournament-specific parameters.
-
-#### Redirect URL Format
-
-**Example:**
-```
-https://<operator-redirect-endpoint>/casino/tournament?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=weekly_tournament&txn_id=txn_20260304_005&op_type=tournament&op_type_id=tourn_2024_001&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
-```
-
-#### Required Parameters
-
-The parameter structure is **identical** to Drops/Rewards (see Section 2.2), with the following semantic difference:
-
-| Parameter | Type | Mandatory | Description |
-|-----------|------|-----------|-------------|
-| op_type | `string` | ✅ Yes | Always `"tournament"` for Battles |
-| op_type_id | `string` | ✅ Yes | Tournament identifier (e.g., `"tourn_2024_001"`) |
-
-> **NOTE:**  
-> For Battles integrations, `op_type` will be `"tournament"` and `op_type_id` will correspond to the unique tournament identifier. These values enable Loco to track which tournament the user joined.
-
----
-
-<a name="33-user-management-apis"></a>
-### 3.3 User Management APIs
-
-**Authentication:** Use Loco-provided bearer token in `Authorization` header
-
-#### Integration Workflow
-
-The Battles integration follows the **same 4-step workflow** as Drops/Rewards:
+<a name="32-integration-workflow"></a>
+### 3.2 Integration Workflow
 
 ```
 Step 1: User clicks "Join Tournament" on Loco
@@ -462,6 +407,43 @@ Step 4: Operator links account (If not already linked)
    ↓
 Step 5: User moves to operator tournament page and notifies Loco of workflow status
 ```
+---
+
+<a name="33-api-integration-steps"></a>
+### 3.3 API Integration Steps
+
+#### Step 1: User Redirection
+
+**Overview:**
+
+Similar to Drops/Rewards, the operator must expose a **user-facing redirect URL** for Battles. When a user clicks "Join Tournament" on Loco, they are redirected to the operator's platform with tournament-specific parameters.
+
+**Who implements:** Loco generates, Operator consumes
+
+**What happens:**
+- User clicks "Join Tournament" on Loco platform
+- Loco generates a signed redirect URL (format defined in Section 3.2)
+- User is redirected to operator's tournament page
+
+**Operator must:**
+1. Accept the redirect URL
+3. Extract tournament information from URL parameters (`op_type_id` contains tournament ID)
+4. Proceed to Step 2
+
+#### Redirect URL Format
+
+```
+https://<operator-redirect-endpoint>/casino/tournament?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=weekly_tournament&txn_id=txn_20260304_005&op_type=tournament&op_type_id=tourn_2024_001&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+```
+
+#### Required Parameters
+
+The parameter structure is **identical** to Drops/Rewards (see Section 2.2), with the following semantic difference:
+
+| Parameter | Type | Mandatory | Description |
+|-----------|------|-----------|-------------|
+| op_type | `string` | ✅ Yes | Always `"tournament"` for Battles |
+| op_type_id | `string` | ✅ Yes | Tournament identifier (e.g., `"tourn_2024_001"`) |
 
 > **IMPORTANT NOTE:**  
 > If the operator has **already integrated Drops/Rewards**, they do **NOT** need to re-integrate the User Management APIs (Steps 2-4) for Battles. The same APIs are used for both features.
@@ -476,27 +458,11 @@ Step 5: User moves to operator tournament page and notifies Loco of workflow sta
 
 ---
 
-#### Step 1: User Redirection
-
-**Who implements:** Loco generates, Operator consumes
-
-**What happens:**
-- User clicks "Join Tournament" on Loco platform
-- Loco generates a signed redirect URL (format defined in Section 3.2)
-- User is redirected to operator's tournament page
-
-**Operator must:**
-1. Accept the redirect URL
-3. Extract tournament information from URL parameters (`op_type_id` contains tournament ID)
-4. Proceed to Step 2
-
----
-
 #### Step 2: Get User Details
 
 **Endpoint:** `POST /api/v1/get-loco-user`
 
-**Same API as Drops/Rewards.** See Section 2.3, Step 2 for complete details.
+**Same API as Drops/Rewards.** See Section 2.3, Step 2 for complete details (Operator → Loco)
 
 **Tournament-specific note:** Use this API to determine if the user already has a linked account before showing the tournament signup form or pre populate deatils in form.
 
@@ -506,7 +472,7 @@ Step 5: User moves to operator tournament page and notifies Loco of workflow sta
 
 **Endpoint:** `POST /api/v1/link-account`
 
-**Same API as Drops/Rewards.** See Section 2.3, Step 3 for complete details.
+**Same API as Drops/Rewards.** See Section 2.3, Step 3 for complete details (Operator → Loco)
 
 **Tournament-specific note:** Set `campaign` parameter to the tournament name or identifier for tracking purposes.
 
@@ -518,7 +484,7 @@ Step 5: User moves to operator tournament page and notifies Loco of workflow sta
 
 **Same API as Drops/Rewards, with tournament-specific parameters.**
 
-See Section 2.3, Step 4 for complete API details.
+See Section 2.3, Step 4 for complete API details. (Operator → Loco)
 
 **Tournament-specific parameters:**
 
@@ -858,41 +824,5 @@ Loco will call this endpoint on-demand when users view their tournament progress
 | score | `integer` | ✅ Yes | Player's current tournament score | `1500` |
 | prize | `string` | ✅ Yes | Prize amount won or projected | `"50"` |
 | prize_currency | `string` | ✅ Yes | Prize currency code | `"USD"`, `"INR"` |
-
----
-
-<a name="4-appendices"></a>
-## 4. Appendices
-
-<a name="appendix-a-standard-http-error-codes"></a>
-### Appendix A: Standard HTTP Error Codes
-
-| Code | Meaning | Description | Recommended Action |
-|------|---------|-------------|-------------------|
-| `400` | Bad Request | Malformed request syntax or invalid parameters | Validate request format and parameters |
-| `401` | Unauthorized | Missing or invalid authentication token | Check Authorization header and token validity |
-| `403` | Forbidden | Valid token but insufficient permissions | Verify operator permissions with Loco team |
-| `404` | Not Found | Resource does not exist | Verify resource ID and endpoint path |
-| `409` | Conflict | Resource already exists or state conflict | Check for duplicate operations or stale data |
-| `422` | Unprocessable Entity | Valid syntax but semantic errors | Review business logic constraints |
-| `429` | Too Many Requests | Rate limit exceeded | Implement exponential backoff and retry logic |
-| `500` | Internal Server Error | Server-side processing failure | Retry with exponential backoff; contact support if persistent |
-| `502` | Bad Gateway | Upstream service unavailable | Retry after delay; check Loco status page |
-| `503` | Service Unavailable | Temporary service disruption | Retry with exponential backoff |
-| `504` | Gateway Timeout | Request timeout | Increase timeout or retry; contact support if persistent |
-
-<a name="appendix-b-data-type-conventions"></a>
-### Appendix B: Data Type Conventions
-
-| Type | Description | Format/Example |
-|------|-------------|----------------|
-| `string` | UTF-8 text | `"example_text"` |
-| `integer` | Whole number | `12345` |
-| `boolean` | True/false value | `true` or `false` |
-| `timestamp` | Unix timestamp | `1709548800` (seconds since epoch) |
-| `iso8601` | ISO 8601 datetime | `"2026-03-04T12:30:00Z"` |
-| `array` | Ordered list | `[item1, item2, item3]` |
-| `object` | Key-value structure | `{"key": "value"}` |
-| `enum` | Fixed set of values | `"ACTIVE"` \| `"INACTIVE"` |
 
 ---
