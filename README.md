@@ -422,7 +422,7 @@ Similar to Drops/Rewards, the operator must expose a **user-facing redirect URL*
 
 **What happens:**
 - User clicks "Join Tournament" on Loco platform
-- Loco generates a signed redirect URL (format defined in Section 3.2)
+- Loco generates a signed redirect URL  
 - User is redirected to operator's tournament page
 
 **Operator must:**
@@ -464,7 +464,7 @@ The parameter structure is **identical** to Drops/Rewards (see Section 2.2), wit
 
 **Same API as Drops/Rewards.** See Section 2.3, Step 2 for complete details (Operator → Loco)
 
-**Tournament-specific note:** Use this API to determine if the user already has a linked account before showing the tournament signup form or pre populate deatils in form.
+**Tournament-specific note:** Use this API to determine if the user already has a linked account before showing the tournament signup form or pre populate details in form.
 
 ---
 
