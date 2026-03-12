@@ -44,36 +44,6 @@ Loco platform enables external operators to integrate two primary engagement fea
 
 Loco Drops are real-time bonus rewards triggered by streamers during live broadcasts. When a drop is activated, viewers are redirected to the operator's platform to claim rewards such as free spins, bonus cash, or quest completions. This feature drives user acquisition and engagement during peak attention moments.
 
-**Visual Journey:**
-
-<table>
-  <tr>
-    <td width="33%" align="center">
-      <img src="https://i.ibb.co/3YSLwTrb/image-10.png" alt="Loco Drops Page" width="250"/>
-    </td>
-    <td width="33%" align="center">
-      <img src="https://i.ibb.co/nNbLY0GB/image-8.png" alt="User Redirected" width="250"/>
-    </td>
-    <td width="33%" align="center">
-      <img src="https://i.ibb.co/ZpYD7PSg/image-9.png" alt="Reward Redeemed" width="250"/>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>Step 1: Loco Drops Page</strong><br/>
-      <em>Users see available Drops on Loco platform during live streams</em>
-    </td>
-    <td align="center">
-      <strong>Step 2: Redirect to Operator</strong><br/>
-      <em>User clicks a Drop and is redirected to operator's signup/reward page</em>
-    </td>
-    <td align="center">
-      <strong>Step 3: Reward Redeemed</strong><br/>
-      <em>User completes signup, receives reward on operator platform, and sees confirmation on Loco</em>
-    </td>
-  </tr>
-</table>
-
 ---
 
 <a name="22-integration-workflow"></a>
@@ -359,37 +329,6 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 **What are Loco Battles?**
 
 Loco Battles enable operators to run tournaments that are discoverable within the Loco platform. Users can view tournament details, track live leaderboards, and deep-link to the operator's platform to participate. This feature drives engagement by showcasing operator tournaments to Loco's audience.
-
-**Visual Journey:**
-
-
-<table>
-  <tr>
-    <td width="33%" align="center">
-      <img src="https://i.ibb.co/xdWHhY2/image-11.png" alt="Loco Drops Page" width="250"/>
-    </td>
-    <td width="33%" align="center">
-      <img src="https://i.ibb.co/nNbLY0GB/image-8.png" alt="User Redirected" width="250"/>
-    </td>
-    <td width="33%" align="center">
-      <img src="https://i.ibb.co/8nXXCSpQ/Screenshot-2026-03-05-at-1-39-04-PM.png" alt="Reward Redeemed" width="250"/>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>Step 1: Loco Battles Page</strong><br/>
-      <em>Users browse available tournaments on Loco platform</em>
-    </td>
-    <td align="center">
-      <strong>Step 2: Redirect to Operator</strong><br/>
-      <em>User clicks "Join Tournament" and is redirected to operator's tournament page</em>
-    </td>
-    <td align="center">
-      <strong>Step 3: User articipates</strong><br/>
-      <em>User participates in tournament on operator platform; leaderboard updates are synced back to Loco</em>
-    </td>
-  </tr>
-</table>
 
 ---
 
