@@ -984,8 +984,8 @@ Loco will call this endpoint periodically (every 6-12 hours) to sync the catalog
 |-------|------|----------|---------------|-------------|---------|
 | game_id | `string` | ✅ Yes | Unique identifier | Unique game identifier on operator platform | `"game_12345"` |
 | game_name | `string` | ✅ Yes | Max 200 chars | Display name of the game | `"Gates of Olympus"` |
-| game_image | `string (URL)` | ✅ Yes | HTTPS URL | Game thumbnail/icon URL (512x512px recommended) | `"https://cdn.operator.com/games/olympus.png"` |
-| game_publisher | `string` | ✅ Yes | Max 100 chars | Game provider/publisher name | `"Pragmatic Play"` |
+| game_image | `string (URL)` | ✅ Yes | HTTPS URL | Game thumbnail/icon URL | `"https://cdn.operator.com/games/olympus.png"` |
+| game_provider | `string` | ✅ Yes | Max 100 chars | Game provider name | `"Pragmatic Play"` |
 
 ---
 
