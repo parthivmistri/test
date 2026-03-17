@@ -31,8 +31,11 @@
 <a name="1-executive-summary"></a>
 ## 1. Executive Summary
 
-Loco enables operators to integrate three engagement features: **Loco Drops/Rewards, Loco Battles,** and **Loco Play.** Drops deliver real-time bonuses during live streams. The Operator Rewards System runs incentive campaigns where users complete tasks to earn operator-funded bonuses. Battles enable tournament discovery and leaderboard tracking. Loco Play redirects viewers to the operator's platform to play the same game being streamed live. All features share a common pattern: users are redirected to the operator's platform, accounts are linked, and workflows tracked via standardized APIs.
+Loco enables operators to integrate three engagement features: **Loco Drops**, **Loco Operator Rewards System**, and **Loco Play**, alongside **Loco Battles** for tournament discovery. 
 
+Loco Drops let streamers deliver operator-funded rewards such as free spins and bonuses to viewers in real time during live streams. The Operator Rewards System enables operators to design custom rewards journeys on Loco to drive user conversions. Loco Play lets viewers join the exact Slots or Live Casino game a streamer is playing with one click, with the correct game or table auto-detected. 
+
+All features follow a common integration pattern: users are redirected to the operator's platform, accounts are linked, and workflows tracked via standardized APIs.
 
 ---
 
@@ -331,8 +334,6 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 
 <a name="31-feature-overview"></a>
 ### 3.1 Feature Overview
-
-**What are Loco Battles?**
 
 Loco Battles enable operators to run tournaments that are discoverable within the Loco platform. Users can view tournament details, track live leaderboards, and deep-link to the operator's platform to participate. This feature drives engagement by showcasing operator tournaments to Loco's audience.
 
@@ -782,8 +783,6 @@ Loco will call this endpoint on-demand when users view their tournament progress
 
 <a name="41-feature-overview"></a>
 ### 4.1 Feature Overview
-
-**What is Loco Play?**
 
 Loco viewers can play the same Slots and Live Casino game as the streamer they are watching - the correct game or table/ session is auto-detected and opened when the user clicks on “Play”
 
