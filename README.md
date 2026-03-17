@@ -20,13 +20,19 @@
 | └─ [3.2 Integration Workflow](#32-integration-workflow) | High level Integration steps for Tournament |
 | └─ [3.3 API Integration Steps](#33-api-integration-steps) | Step-by-step API integration workflow |
 | └─ [3.4 Tournament APIs](#34-tournament-apis) | Operator-hosted tournament endpoints |
+| **[4. Loco Play](#4-loco-play)** | Integration guide for Loco Play feature |
+| └─ [4.1 Feature Overview](#41-feature-overview) | What is Loco Play |
+| └─ [4.2 Integration Workflow](#42-integration-workflow) | High level integration steps |
+| └─ [4.3 API Integration Steps](#43-api-integration-steps) | Step-by-step API integration workflow |
+| └─ [4.4 Loco Play APIs](#44-loco-play-apis) | Operator-hosted Loco Play endpoints |
 
 ---
 
 <a name="1-executive-summary"></a>
 ## 1. Executive Summary
 
-Loco platform enables external operators to integrate two primary engagement features: **Loco Drops/Rewards** and **Loco Battles**. Loco Drops allow real-time bonus distribution during live streams, while Loco Battles enable tournament discovery and leaderboard tracking. Both features follow a common integration pattern: users are redirected from Loco to the operator's platform, accounts are linked, and workflows are tracked via standardized APIs. Operators implement user-facing redirect URLs, consume Loco's User Management APIs, and (for Battles) expose Tournament APIs for Loco to consume.
+Loco enables operators to integrate three engagement features: **Loco Drops/Rewards, Loco Battles,** and **Loco Play.** Drops deliver real-time bonuses during live streams. The Operator Rewards System runs incentive campaigns where users complete tasks to earn operator-funded bonuses. Battles enable tournament discovery and leaderboard tracking. Loco Play redirects viewers to the operator's platform to play the same game being streamed live. All features share a common pattern: users are redirected to the operator's platform, accounts are linked, and workflows tracked via standardized APIs.
+
 
 ---
 
@@ -40,9 +46,9 @@ Loco platform enables external operators to integrate two primary engagement fea
 <a name="21-feature-overview"></a>
 ### 2.1 Feature Overview
 
-**What are Loco Drops?**
+**Loco Drops:** Streamers can drop operator-funded rewards (Free Spins, bonuses) to viewers in real time during a live stream - engagement feature not available elsewhere
 
-Loco Drops are real-time bonus rewards triggered by streamers during live broadcasts. When a drop is activated, viewers are redirected to the operator's platform to claim rewards such as free spins, bonus cash, or quest completions. This feature drives user acquisition and engagement during peak attention moments.
+**Loco Operator Rewards System:** Operators can design custom rewards journeys on Loco (for rewards like Free Spins, bonuses and voucher codes) to drive user conversions
 
 ---
 
@@ -763,5 +769,287 @@ Loco will call this endpoint on-demand when users view their tournament progress
 | score | `integer` | ✅ Yes | Player's current tournament score | `1500` |
 | prize | `string` | ✅ Yes | Prize amount won or projected | `"50"` |
 | prize_currency | `string` | ✅ Yes | Prize currency code | `"USD"`, `"INR"` |
+
+---
+
+
+<a name="4-loco-play"></a>
+## 4. Loco Play
+
+**Direction:** Bidirectional (Operator calls Loco User Management APIs; Loco calls Operator Loco Play APIs)  
+**Implementation:** Loco hosts User Management APIs; Operator hosts Loco Play APIs  
+**Authentication:** Mutual token exchange during onboarding
+
+<a name="41-feature-overview"></a>
+### 4.1 Feature Overview
+
+**What is Loco Play?**
+
+Loco viewers can play the same Slots and Live Casino game as the streamer they are watching - the correct game or table/ session is auto-detected and opened when the user clicks on “Play”
+
+---
+
+<a name="42-integration-workflow"></a>
+### 4.2 Integration Workflow
+
+```
+Step 1: User clicks "Play Now" on Loco stream
+   ↓
+Step 2: Loco redirects user to Operator platform (with redirect URL)
+   ↓
+Step 3: Operator validates URL and fetches user details from Loco
+   ↓
+Step 4: Operator links account (If not already linked)
+   ↓
+Step 5: User is redirected to game page and operator notifies Loco of workflow status
+```
+
+---
+
+<a name="43-api-integration-steps"></a>
+### 4.3 API Integration Steps
+
+#### Step 1: User Redirection
+
+**Overview:**
+
+Similar to Drops/Rewards and Battles, the operator must expose a **user-facing redirect URL** for Loco Play. When a user clicks "Play Now" on Loco, they are redirected to the operator's platform with game-specific parameters.
+
+**Who implements:** Loco generates, Operator consumes
+
+**What happens:**
+- User clicks "Play Now" on Loco platform
+- Loco generates a signed redirect URL  
+- User is redirected to operator's game page
+
+**Operator must:**
+1. Accept the redirect URL
+2. Extract game information from URL parameters (`op_type_id` contains `game_id`)
+3. Proceed to Step 2
+
+#### Redirect URL Format
+
+```
+https://<operator-redirect-endpoint>/casino/play?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=loco_play&txn_id=txn_20260304_007&op_type=loco_play&op_type_id=game_12345&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+```
+
+#### Required Parameters
+
+The parameter structure is **identical** to Drops/Rewards and Battles, with the following semantic difference:
+
+| Parameter | Type | Mandatory | Description |
+|-----------|------|-----------|-------------|
+| op_type | `string` | ✅ Yes | Always `"loco_play"` for Loco Play |
+| op_type_id | `string` | ✅ Yes | Game identifier (e.g., `"game_12345"`) |
+
+> **IMPORTANT NOTE:**  
+> If the operator has **already integrated Drops/Rewards or Battles**, they do **NOT** need to re-integrate the User Management APIs (Steps 2-4) for Loco Play. The same APIs are used for all features.
+> 
+> **What needs to be updated:**
+> - Ensure the redirect URL handler correctly processes `op_type="loco_play"` and `op_type_id={game_id}`
+> - Update the **Workflow Status Notification API** (Step 4) to pass game-specific parameters:
+>   - `op_type="loco_play"`
+>   - `op_type_id={game_id}` (the game the user launched)
+ 
+> **If this is your first integration**, proceed with all 4 steps below.
+
+---
+
+#### Step 2: Get User Details
+
+**Endpoint:** `POST /api/v1/get-loco-user`
+
+**Same API as Drops/Rewards and Battles.** See Section 2.3, Step 2 for complete details (Operator → Loco)
+
+**Loco Play specific note:** Use this API to determine if the user already has a linked account before showing the game launch form or to pre-populate details in the form.
+
+---
+
+#### Step 3: Link User Account
+
+**Endpoint:** `POST /api/v1/link-account`
+
+**Same API as Drops/Rewards and Battles.** See Section 2.3, Step 3 for complete details (Operator → Loco)
+
+**Loco Play specific note:** Set `campaign` parameter to `"loco_play"` or the specific game name for tracking purposes.
+
+---
+
+#### Step 4: Workflow Status Notification
+
+**Endpoint:** `POST /api/v1/workflow-status`
+
+**Same API as Drops/Rewards and Battles, with game-specific parameters.**
+
+See Section 2.3, Step 4 for complete API details (Operator → Loco)
+
+**Loco Play specific parameters:**
+
+| Field | Value for Loco Play |
+|-------|---------------------|
+| status | `COMPLETE` if user successfully launched the game |
+| campaign | `"loco_play"` or specific game name |
+| is_bonus_offered | Typically `false` (unless operator provides welcome bonus) |
+
+**Sample Request (Loco Play):**
+
+```json
+{
+  "loco_uid": "loco_12345678",
+  "ext_player_id": "op_98765432",
+  "screen_name": "ProGamer123",
+  "source": "loco",
+  "campaign": "loco_play",
+  "brand": "operator_brand",
+  "timestamp": "2026-03-04T14:00:00Z",
+  "loco_txn_id": "txn_20260304_007",
+  "status": "COMPLETE",
+  "category": "loco_play_user",
+  "is_bonus_offered": false
+}
+```
+
+---
+
+<a name="44-loco-play-apis"></a>
+### 4.4 Loco Play APIs
+
+**Direction:** Loco → Operator  
+**Implementation:** **Operator must host these APIs**  
+**Authentication:** Operator provides bearer token to Loco; Loco uses this token when calling operator endpoints
+
+#### Integration Requirements
+
+**Operator must:**
+1. **Implement** all endpoints specified in this section
+2. **Host** these APIs on operator's infrastructure
+3. **Provide** base URL to Loco team (production and staging)
+4. **Generate** authentication tokens and provide to Loco during onboarding
+
+#### Endpoint Summary
+
+| Endpoint | Method | Purpose | Call Frequency |
+|----------|--------|---------|----------------|
+| `/loco-play/games` | GET | List all eligible games for Loco Play | Every 6-12 hours (scheduled sync) |
+| `/loco-play/user-active-games` | GET | Get games a linked user is currently playing | Real-time polling (every 10-30 seconds) |
+
+---
+
+#### 4.4.1 Get Eligible Games List
+
+**Operator must implement this endpoint**
+
+**Purpose:** Retrieve list of all games eligible for Loco Play integration.
+
+##### Endpoint
+
+```
+GET /loco-play/games
+```
+
+**Full URL Example:**  
+`https://api.operator-domain.com/loco-play/games`
+
+##### Description
+
+Loco will call this endpoint periodically (every 6-12 hours) to sync the catalog of games available for Loco Play. Only games where the operator can track user start/stop events should be included.
+
+##### Request Headers
+
+**Loco will send:**
+
+| Header | Type | Value | Description |
+|--------|------|-------|-------------|
+| Authorization | `string` | `Bearer {OPERATOR_TOKEN}` | Operator-provided authentication token |
+| Content-Type | `string` | `application/json` | Request content type |
+| Accept | `string` | `application/json` | Expected response format |
+
+##### Response Structure
+
+**Operator must return:**
+
+**Top-level Response:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| status | `string` | ✅ Yes | `"SUCCESS"` or `"ERROR"` |
+| error_code | `string` | ⬜ No | Error code if status is `"ERROR"` |
+| error_id | `integer` | ⬜ No | Error identifier if status is `"ERROR"` |
+| error_description | `string` | ⬜ No | Error description if status is `"ERROR"` |
+| data | `array` | ✅ Yes | List of Game objects |
+
+**Object: Game**
+
+| Field | Type | Required | Format/Values | Description | Example |
+|-------|------|----------|---------------|-------------|---------|
+| game_id | `string` | ✅ Yes | Unique identifier | Unique game identifier on operator platform | `"game_12345"` |
+| game_name | `string` | ✅ Yes | Max 200 chars | Display name of the game | `"Gates of Olympus"` |
+| game_image | `string (URL)` | ✅ Yes | HTTPS URL | Game thumbnail/icon URL (512x512px recommended) | `"https://cdn.operator.com/games/olympus.png"` |
+| game_publisher | `string` | ✅ Yes | Max 100 chars | Game provider/publisher name | `"Pragmatic Play"` |
+
+---
+
+#### 4.4.2 Get User Active Games
+
+**Operator must implement this endpoint**
+
+**Purpose:** Check which games a specific linked user is currently playing in real-time.
+
+##### Endpoint
+
+```
+GET /loco-play/user-active-games
+```
+
+**Full URL Example:**  
+`https://api.operator-domain.com/loco-play/user-active-games?ext_player_id=op_98765432&loco_uid=loco_12345678`
+
+##### Description
+
+Loco will call this endpoint in real-time when viewers are watching a stream to determine if the streamer is currently playing any games. This enables the "Play Now" button to appear dynamically during live streams.
+
+**Call Frequency:** Real-time polling (every 10-30 seconds during active streams)
+
+##### Request Headers
+
+**Loco will send:**
+
+| Header | Type | Value | Description |
+|--------|------|-------|-------------|
+| Authorization | `string` | `Bearer {OPERATOR_TOKEN}` | Operator-provided authentication token |
+| Content-Type | `string` | `application/json` | Request content type |
+| Accept | `string` | `application/json` | Expected response format |
+
+##### Query Parameters
+
+**Loco will send:**
+
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| ext_player_id | `string` | ✅ Yes | Operator platform user ID | `"op_98765432"` |
+| loco_uid | `string` | ✅ Yes | Loco user identifier | `"loco_12345678"` |
+
+##### Response Structure
+
+**Operator must return:**
+
+**Top-level Response:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| status | `string` | ✅ Yes | `"SUCCESS"` or `"ERROR"` |
+| error_code | `string` | ⬜ No | Error code if status is `"ERROR"` |
+| error_id | `integer` | ⬜ No | Error identifier if status is `"ERROR"` |
+| error_description | `string` | ⬜ No | Error description if status is `"ERROR"` |
+| data | `object` | ✅ Yes | UserActiveGames object |
+
+**Object: UserActiveGames**
+
+| Field | Type | Required | Description | Example |
+|-------|------|----------|-------------|---------|
+| ext_player_id | `string` | ✅ Yes | Operator platform user ID | `"op_98765432"` |
+| loco_uid | `string` | ✅ Yes | Loco user identifier | `"loco_12345678"` |
+| active_games | `array` | ✅ Yes | List of game IDs currently being played | `["game_12345", "game_67890"]` |
+| last_updated | `integer` | ✅ Yes | Unix timestamp of last game activity (seconds) | `1714521600` |
 
 ---
