@@ -107,7 +107,7 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 | sig | `string` | ✅ Yes | HMAC-SHA256 signature for request validation |
 
 > **NOTE:**  
-> For Drops/Rewards integrations, `op_type` will be `"bonus"` or `"loco_link_account"`, and `op_type_id` corresponds to the specific reward identifier. These values along with `txn_id` are used for tracking and must be passed back to Loco in Step 4.
+> For Drops/Rewards integrations, `op_type` will be `"bonus"` or `"drop"`, and `op_type_id` corresponds to the specific reward identifier. These values along with `txn_id` are used for tracking and must be passed back to Loco in Step 4.
 
 ---
 
