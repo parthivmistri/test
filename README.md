@@ -11,52 +11,46 @@
 | Section | Description |
 |---------|-------------|
 | **[1. Executive Summary](#1-executive-summary)** | Overview of integration capabilities and workflow |
-| **[2. Loco Drops / Rewards](#2-loco-drops--rewards)** | Integration guide for Drops and Quest rewards |
-| └─ [2.1 Feature Overview](#21-feature-overview) | What are Loco Drops and Rewards |
-| └─ [2.2 Integration Workflow](#22-integration-workflow) | High level Integration steps for Loco Drops / Rewards |
-| └─ [2.3 API Integration Steps](#23-api-integration-steps) | Step-by-step API integration workflow |
+| **[2. Loco Operator Rewards System/ Loco Drops](#2-loco-drops--rewards)** | Integration guide for Drops and Quest rewards |
+| └─ [2.1 Integration Workflow](#21-integration-workflow) | High level Integration steps for Loco Drops / Rewards |
+| └─ [2.2 API Integration Steps](#22-api-integration-steps) | Step-by-step API integration workflow |
 | **[3. Loco Battles](#3-loco-battles)** | Integration guide for tournament features |
-| └─ [3.1 Feature Overview](#31-feature-overview) | What are Loco Battles |
-| └─ [3.2 Integration Workflow](#32-integration-workflow) | High level Integration steps for Tournament |
-| └─ [3.3 API Integration Steps](#33-api-integration-steps) | Step-by-step API integration workflow |
-| └─ [3.4 Tournament APIs](#34-tournament-apis) | Operator-hosted tournament endpoints |
+| └─ [3.1 Integration Workflow](#31-integration-workflow) | High level Integration steps for Tournament |
+| └─ [3.2 API Integration Steps](#32-api-integration-steps) | Step-by-step API integration workflow |
+| └─ [3.3 Tournament APIs](#33-tournament-apis) | Operator-hosted tournament endpoints |
 | **[4. Loco Play](#4-loco-play)** | Integration guide for Loco Play feature |
-| └─ [4.1 Feature Overview](#41-feature-overview) | What is Loco Play |
-| └─ [4.2 Integration Workflow](#42-integration-workflow) | High level integration steps |
-| └─ [4.3 API Integration Steps](#43-api-integration-steps) | Step-by-step API integration workflow |
-| └─ [4.4 Loco Play APIs](#44-loco-play-apis) | Operator-hosted Loco Play endpoints |
+| └─ [4.1 Integration Workflow](#41-integration-workflow) | High level integration steps |
+| └─ [4.2 API Integration Steps](#42-api-integration-steps) | Step-by-step API integration workflow |
+| └─ [4.3 Loco Play APIs](#43-loco-play-apis) | Operator-hosted Loco Play endpoints |
 
 ---
 
 <a name="1-executive-summary"></a>
 ## 1. Executive Summary
 
-Loco enables operators to integrate three engagement features: **Loco Drops**, **Loco Operator Rewards System**, and **Loco Play**, alongside **Loco Battles** for tournament discovery. 
+This document lays out the API structure and workflow between Loco and operator partners for developing and integrating the following user-facing features on the Loco platform:
+1. **Loco Operator Rewards System:** Operators can design custom rewards journeys based on engagement/ other qualifying actions performed by users (for rewards like Free Spins, bonuses) 
+2. **Loco Drops:** Streamers can drop operator-funded rewards (Free Spins, bonuses) to viewers in real time during a live stream 
+3. **Loco Battles:** Users are able to see and join operator-run tournaments/ leaderboards on the operator platform, directly from high-visibility areas of Loco (live streams, home feed, etc.)
+4. **Loco Play:** Viewers are able to see “Play now” modal under live stream for exact game being played by streamer; on click, Loco auto-detects the correct game or table/ session and lands the user directly into the game on the operator site
 
-Loco Drops let streamers deliver operator-funded rewards such as free spins and bonuses to viewers in real time during live streams. The Operator Rewards System enables operators to design custom rewards journeys on Loco to drive user conversions. Loco Play lets viewers join the exact Slots or Live Casino game a streamer is playing with one click, with the correct game or table auto-detected. 
-
-All features follow a common integration pattern: users are redirected to the operator's platform, accounts are linked, and workflows tracked via standardized APIs.
+All features follow a common integration pattern: a user is redirected to the operator's platform,  the user’s Loco account and player account on the operator platform are linked together, and user action/ workflows are tracked via standardized APIs.
 
 ---
 
 <a name="2-loco-drops--rewards"></a>
-## 2. Loco Drops / Rewards
+## 2. Loco Operator Rewards System/ Loco Drops
 
 **Direction:** Operator → Loco (Operator calls Loco APIs)  
 **Implementation:** Loco hosts User Management APIs; Operator implements redirect handler  
-**Authentication:** Loco provides bearer token to Operator during onboarding
+**Authentication:** Loco provides bearer token to Operator during onboarding  
 
-<a name="21-feature-overview"></a>
-### 2.1 Feature Overview
-
-**Loco Drops:** Streamers can drop operator-funded rewards (Free Spins, bonuses) to viewers in real time during a live stream - engagement feature not available elsewhere
-
-**Loco Operator Rewards System:** Operators can design custom rewards journeys on Loco (for rewards like Free Spins, bonuses and voucher codes) to drive user conversions
+_While the end-user experience on Loco is different for these two features, they utilize the same tech flow._
 
 ---
 
-<a name="22-integration-workflow"></a>
-### 2.2 Integration Workflow
+<a name="21-integration-workflow"></a>
+### 2.1 Integration Workflow
 
 The Drops/Rewards integration follows a 4-step workflow:
 
@@ -72,8 +66,8 @@ Step 4: Operator links account and notifies Loco of workflow status
 
 ---
 
-<a name="23-api-integration-steps"></a>
-### 2.3 API Integration Steps
+<a name="22-api-integration-steps"></a>
+### 2.2 API Integration Steps
 
 #### Step 1: User Redirection
 
@@ -332,15 +326,10 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 **Implementation:** Loco hosts User Management APIs; Operator hosts Tournament APIs  
 **Authentication:** Mutual token exchange during onboarding
 
-<a name="31-feature-overview"></a>
-### 3.1 Feature Overview
-
-Loco Battles enable operators to run tournaments that are discoverable within the Loco platform. Users can view tournament details, track live leaderboards, and deep-link to the operator's platform to participate. This feature drives engagement by showcasing operator tournaments to Loco's audience.
-
 ---
 
-<a name="32-integration-workflow"></a>
-### 3.2 Integration Workflow
+<a name="31-integration-workflow"></a>
+### 3.1 Integration Workflow
 
 ```
 Step 1: User clicks "Join Tournament" on Loco
@@ -355,8 +344,8 @@ Step 5: User moves to operator tournament page and notifies Loco of workflow sta
 ```
 ---
 
-<a name="33-api-integration-steps"></a>
-### 3.3 API Integration Steps
+<a name="32-api-integration-steps"></a>
+### 3.2 API Integration Steps
 
 #### Step 1: User Redirection
 
@@ -408,7 +397,7 @@ The parameter structure is **identical** to Drops/Rewards (see Section 2.2), wit
 
 **Endpoint:** `POST /api/v1/get-loco-user`
 
-**Same API as Drops/Rewards.** See Section 2.3, Step 2 for complete details (Operator → Loco)
+**Same API as Drops/Rewards.** See Section 2.2, Step 2 for complete details (Operator → Loco)
 
 **Tournament-specific note:** Use this API to determine if the user already has a linked account before showing the tournament signup form or pre populate details in form.
 
@@ -418,7 +407,7 @@ The parameter structure is **identical** to Drops/Rewards (see Section 2.2), wit
 
 **Endpoint:** `POST /api/v1/link-account`
 
-**Same API as Drops/Rewards.** See Section 2.3, Step 3 for complete details (Operator → Loco)
+**Same API as Drops/Rewards.** See Section 2.2, Step 3 for complete details (Operator → Loco)
 
 **Tournament-specific note:** Set `campaign` parameter to the tournament name or identifier for tracking purposes.
 
@@ -430,7 +419,7 @@ The parameter structure is **identical** to Drops/Rewards (see Section 2.2), wit
 
 **Same API as Drops/Rewards, with tournament-specific parameters.**
 
-See Section 2.3, Step 4 for complete API details. (Operator → Loco)
+See Section 2.2, Step 4 for complete API details. (Operator → Loco)
 
 **Tournament-specific parameters:**
 
@@ -460,8 +449,8 @@ See Section 2.3, Step 4 for complete API details. (Operator → Loco)
 
 ---
 
-<a name="34-tournament-apis"></a>
-### 3.4 Tournament APIs
+<a name="33-tournament-apis"></a>
+### 3.3 Tournament APIs
 
 **Direction:** Loco → Operator  
 **Implementation:** **Operator must host these APIs**  
@@ -486,7 +475,7 @@ See Section 2.3, Step 4 for complete API details. (Operator → Loco)
 
 ---
 
-#### 3.4.1 Get Tournament Schedule
+#### 3.3.1 Get Tournament Schedule
 
 **Operator must implement this endpoint**
 
@@ -557,7 +546,7 @@ Loco will call this endpoint every 60 minutes to sync tournament data. This endp
 
 ---
 
-#### 3.4.2 Get Tournament Details
+#### 3.3.2 Get Tournament Details
 
 **Operator must implement this endpoint**
 
@@ -642,7 +631,7 @@ Loco will call this endpoint on-demand when users view tournament detail pages. 
 
 ---
 
-#### 3.4.3 Get Tournament Leaderboard
+#### 3.3.3 Get Tournament Leaderboard
 
 **Operator must implement this endpoint**
 
@@ -715,7 +704,7 @@ Loco will call this endpoint on-demand when users view tournament leaderboards. 
 
 ---
 
-#### 3.4.4 Get Player Tournament Rank
+#### 3.3.4 Get Player Tournament Rank
 
 **Operator must implement this endpoint**
 
@@ -781,15 +770,10 @@ Loco will call this endpoint on-demand when users view their tournament progress
 **Implementation:** Loco hosts User Management APIs; Operator hosts Loco Play APIs  
 **Authentication:** Mutual token exchange during onboarding
 
-<a name="41-feature-overview"></a>
-### 4.1 Feature Overview
-
-Loco viewers can play the same Slots and Live Casino game as the streamer they are watching - the correct game or table/ session is auto-detected and opened when the user clicks on “Play”
-
 ---
 
-<a name="42-integration-workflow"></a>
-### 4.2 Integration Workflow
+<a name="41-integration-workflow"></a>
+### 4.1 Integration Workflow
 
 ```
 Step 1: User clicks "Play Now" on Loco stream
@@ -805,8 +789,8 @@ Step 5: User is redirected to game page and operator notifies Loco of workflow s
 
 ---
 
-<a name="43-api-integration-steps"></a>
-### 4.3 API Integration Steps
+<a name="42-api-integration-steps"></a>
+### 4.2 API Integration Steps
 
 #### Step 1: User Redirection
 
@@ -858,7 +842,7 @@ The parameter structure is **identical** to Drops/Rewards and Battles, with the 
 
 **Endpoint:** `POST /api/v1/get-loco-user`
 
-**Same API as Drops/Rewards and Battles.** See Section 2.3, Step 2 for complete details (Operator → Loco)
+**Same API as Drops/Rewards and Battles.** See Section 2.2, Step 2 for complete details (Operator → Loco)
 
 **Loco Play specific note:** Use this API to determine if the user already has a linked account before showing the game launch form or to pre-populate details in the form.
 
@@ -868,7 +852,7 @@ The parameter structure is **identical** to Drops/Rewards and Battles, with the 
 
 **Endpoint:** `POST /api/v1/link-account`
 
-**Same API as Drops/Rewards and Battles.** See Section 2.3, Step 3 for complete details (Operator → Loco)
+**Same API as Drops/Rewards and Battles.** See Section 2.2, Step 3 for complete details (Operator → Loco)
 
 **Loco Play specific note:** Set `campaign` parameter to `"loco_play"` or the specific game name for tracking purposes.
 
@@ -880,7 +864,7 @@ The parameter structure is **identical** to Drops/Rewards and Battles, with the 
 
 **Same API as Drops/Rewards and Battles, with game-specific parameters.**
 
-See Section 2.3, Step 4 for complete API details (Operator → Loco)
+See Section 2.2, Step 4 for complete API details (Operator → Loco)
 
 **Loco Play specific parameters:**
 
@@ -910,8 +894,8 @@ See Section 2.3, Step 4 for complete API details (Operator → Loco)
 
 ---
 
-<a name="44-loco-play-apis"></a>
-### 4.4 Loco Play APIs
+<a name="43-loco-play-apis"></a>
+### 4.3 Loco Play APIs
 
 **Direction:** Loco → Operator  
 **Implementation:** **Operator must host these APIs**  
@@ -934,7 +918,7 @@ See Section 2.3, Step 4 for complete API details (Operator → Loco)
 
 ---
 
-#### 4.4.1 Get Eligible Games List
+#### 4.3.1 Get Eligible Games List
 
 **Operator must implement this endpoint**
 
@@ -988,7 +972,7 @@ Loco will call this endpoint periodically (every 6-12 hours) to sync the catalog
 
 ---
 
-#### 4.4.2 Get User Active Games
+#### 4.3.2 Get User Active Games
 
 **Operator must implement this endpoint**
 
