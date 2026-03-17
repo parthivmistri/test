@@ -101,7 +101,7 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 | utm_loco_uname | `string` | ✅ Yes | Loco username |
 | utm_campaign | `string` | ✅ Yes | Campaign identifier for tracking |
 | txn_id | `string` | ✅ Yes | Unique transaction ID for idempotency |
-| op_type | `string` | ✅ Yes | Operation type: `"bonus"`, `"loco_link_account"` |
+| op_type | `string` | ✅ Yes | Operation type: `"bonus"`, `"drop"` |
 | op_type_id | `string` | ✅ Yes | Reward ID or bundle ID |
 | ts | `integer` | ✅ Yes | Unix timestamp (seconds) |
 | sig | `string` | ✅ Yes | HMAC-SHA256 signature for request validation |
