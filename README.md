@@ -22,7 +22,7 @@
 | └─ [4.1 Integration Workflow](#41-integration-workflow) | High level integration steps |
 | └─ [4.2 API Integration Steps](#42-api-integration-steps) | Step-by-step API integration workflow |
 | └─ [4.3 Loco Play APIs](#43-loco-play-apis) | Operator-hosted Loco Play endpoints |
-| **[5. Loco Embed](#5-loco-embed)** | Integration guide for embed feature |
+| **[5. Loco Live Stream Embeds](#5-loco-embed)** | Integration guide for Loco Live Stream Embeds feature |
 | └─ [5.1 Integration Workflow](#51-integration-workflow) | High level integration steps |
 | └─ [5.2 API Integration Steps](52-api-integration-steps) | Step-by-step API integration workflow |
 | └─ [5.3 Frontend Integration](#53-frontend-integration) | Rendering streams and customization |
@@ -37,7 +37,7 @@ This document lays out the API structure and workflow between Loco and operator 
 2. **Loco Drops:** Streamers can drop operator-funded rewards (Free Spins, bonuses) to viewers in real time during a live stream 
 3. **Loco Battles:** Users are able to see and join operator-run tournaments/ leaderboards on the operator platform, directly from high-visibility areas of Loco (live streams, home feed, etc.)
 4. **Loco Play:** Viewers are able to see “Play now” modal under live stream for exact game being played by streamer; on click, Loco auto-detects the correct game or table/ session and lands the user directly into the game on the operator site
-4. **Loco Embeds:** Loco streams can be embedded directly into your platform. You call the Loco API with the token we provide during onboarding, and it returns a list of live streams. each with a ready-made player snippet (`embed_code`). You decide where and how many streams appear. Loco takes care of the video and the player itself.
+4. **Loco Live Stream Embeds:** Operators have the ability to play the live streams of their streamers on their own casino website, when the streamer is live on Loco. Players on the casino site now have an additional engagement layer available and can watch top creators and live streams directly.
 
 All features follow a common integration pattern: a user is redirected to the operator's platform,  the user’s Loco account and player account on the operator platform are linked together, and user action/ workflows are tracked via standardized APIs.
 
@@ -1042,7 +1042,7 @@ Loco will call this endpoint in real-time when viewers are watching a stream to 
 
 ---
 <a name="5-loco-embed"></a>
-## 5. Loco Embed
+## 5. Loco Live Stream Embeds
  
 **Direction:** Operator → Loco (Operator calls Loco Feed API)  
 **Implementation:** Loco hosts Feed API; Operator implements stream rendering  
@@ -1080,15 +1080,8 @@ Step 4: Viewers watch streams through Loco-hosted players
 ##### Endpoint
  
 ```
-GET /lcstr/v1/operator/feed/
+GET /api/v1/operator/feed/
 ```
- 
-**Full URL Example:**  
-`https://api.loco.example/lcstr/v1/operator/feed/`
- 
-##### Description
- 
-Loco will provide this endpoint for operators to fetch the current list of streams. Each stream includes metadata and a ready-to-use `embed_code` (HTML iframe) that can be rendered directly in the operator's UI.
  
  
 ##### Request Headers
