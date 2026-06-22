@@ -1,7 +1,7 @@
 # Loco Operator Integration Documentation
 
-**Document Version:** 3.0  
-**Last Updated:** March 2026  
+**Document Version:** 4.0  
+**Last Updated:** Jun 2026  
 **Owner:** Engineering & Product Team, Loco
 
 ---
@@ -14,7 +14,7 @@
 | **[2. Loco Operator Rewards System/ Loco Drops](#2-loco-drops--rewards)** | Integration guide for Drops and Quest rewards |
 | └─ [2.1 Integration Workflow](#21-integration-workflow) | High level Integration steps for Loco Drops / Rewards |
 | └─ [2.2 API Integration Steps](#22-api-integration-steps) | Step-by-step API integration workflow |
-| **[3. Loco Battles](#3-loco-battles)** | Integration guide for tournament features |
+| **[3. Loco Battles](#3-loco-battles)** | Integration guide for tournament feature |
 | └─ [3.1 Integration Workflow](#31-integration-workflow) | High level Integration steps for Tournament |
 | └─ [3.2 API Integration Steps](#32-api-integration-steps) | Step-by-step API integration workflow |
 | └─ [3.3 Tournament APIs](#33-tournament-apis) | Operator-hosted tournament endpoints |
@@ -22,6 +22,10 @@
 | └─ [4.1 Integration Workflow](#41-integration-workflow) | High level integration steps |
 | └─ [4.2 API Integration Steps](#42-api-integration-steps) | Step-by-step API integration workflow |
 | └─ [4.3 Loco Play APIs](#43-loco-play-apis) | Operator-hosted Loco Play endpoints |
+| **[5. Loco Embed](#5-loco-embed)** | Integration guide for embed feature |
+| └─ [5.1 Integration Workflow](#51-integration-workflow) | High level integration steps |
+| └─ [5.2 API Integration Steps](52-api-integration-steps) | Step-by-step API integration workflow |
+| └─ [5.3 Frontend Integration](#53-frontend-integration) | Rendering streams and customization |
 
 ---
 
@@ -33,6 +37,7 @@ This document lays out the API structure and workflow between Loco and operator 
 2. **Loco Drops:** Streamers can drop operator-funded rewards (Free Spins, bonuses) to viewers in real time during a live stream 
 3. **Loco Battles:** Users are able to see and join operator-run tournaments/ leaderboards on the operator platform, directly from high-visibility areas of Loco (live streams, home feed, etc.)
 4. **Loco Play:** Viewers are able to see “Play now” modal under live stream for exact game being played by streamer; on click, Loco auto-detects the correct game or table/ session and lands the user directly into the game on the operator site
+4. **Loco Embeds:** Loco streams can be embedded directly into your platform. You call the Loco API with the token we provide during onboarding, and it returns a list of live streams. each with a ready-made player snippet (`embed_code`). You decide where and how many streams appear. Loco takes care of the video and the player itself.
 
 All features follow a common integration pattern: a user is redirected to the operator's platform,  the user’s Loco account and player account on the operator platform are linked together, and user action/ workflows are tracked via standardized APIs.
 
@@ -1035,4 +1040,188 @@ Loco will call this endpoint in real-time when viewers are watching a stream to 
 | active_games | `array` | ✅ Yes | List of game IDs currently being played | `["game_12345", "game_67890"]` |
 | last_updated | `integer` | ✅ Yes | Unix timestamp of last game activity (seconds) | `1714521600` |
 
+---
+<a name="5-loco-embed"></a>
+## 5. Loco Embed
+ 
+**Direction:** Operator → Loco (Operator calls Loco Feed API)  
+**Implementation:** Loco hosts Feed API; Operator implements stream rendering  
+**Authentication:** Loco provides bearer token to Operator during onboarding
+ 
+---
+ 
+<a name="51-integration-workflow"></a>
+### 5.1 Integration Workflow
+ 
+```
+Step 1: Operator calls Feed API with bearer token
+   ↓
+Step 2: Loco returns array of available streams with embed codes
+   ↓
+Step 3: Operator renders embed_code as iframes in their UI
+   ↓
+Step 4: Viewers watch streams through Loco-hosted players
+```
+ 
+---
+ 
+<a name="52-api-integration-steps"></a>
+### 5.2 API Integration Steps
+ 
+**Direction:** Operator → Loco  
+**Implementation:** Loco hosts this API  
+**Authentication:** Bearer token provided by Loco during onboarding
+ 
+#### 5.2.1 Get Stream Feed
+ 
+**Purpose:** Retrieve list of live streams available for embedding on operator platform.
+**Call Frequency:** Every 30-60 seconds (to sync live status and stream list)
+ 
+##### Endpoint
+ 
+```
+GET /lcstr/v1/operator/feed/
+```
+ 
+**Full URL Example:**  
+`https://api.loco.example/lcstr/v1/operator/feed/`
+ 
+##### Description
+ 
+Loco will provide this endpoint for operators to fetch the current list of streams. Each stream includes metadata and a ready-to-use `embed_code` (HTML iframe) that can be rendered directly in the operator's UI.
+ 
+ 
+##### Request Headers
+ 
+**Operator must send:**
+ 
+| Header | Type | Value | Description |
+|--------|------|-------|-------------|
+| Authorization | `string` | `Bearer {OPERATOR_TOKEN}` | Loco-provided authentication token |
+| Content-Type | `string` | `application/json` | Request content type |
+| Accept | `string` | `application/json` | Expected response format |
+ 
+ 
+##### Response Structure
+ 
+**Top-level Response:** Array of `Stream` objects
+ 
+**Object: Stream**
+ 
+| Field | Type | Required | Description | Example |
+|-------|------|----------|-------------|---------|
+| id | `string` | ✅ Yes | Unique stream identifier | `"stream_abc123"` |
+| title | `string` | ✅ Yes | Stream display title | `"Evening Roulette Live"` |
+| streamer_name | `string` | ✅ Yes | Host/streamer name | `"LocoHost_01"` |
+| status | `enum` | ✅ Yes | Current stream status | `live` \| `offline`  |
+| thumbnail_url | `string (URL)` | ✅ Yes | Stream thumbnail (can be shown before stream loads; 640x360px recommended) | `"https://cdn.loco.example/thumbs/abc123.jpg"` |
+| embed_code | `string` | ✅ Yes | Complete `<iframe>` HTML snippet (ready to use in UI) | `"<iframe src=\"https://embed.loco.example/player/abc123?key=...\" width=\"640\" height=\"360\" frameborder=\"0\" allowfullscreen></iframe>"` |
+ 
+##### Sample Response
+ 
+```json
+[
+  {
+    "id": "stream_abc123",
+    "title": "Evening Roulette Live",
+    "streamer_name": "LocoHost_01",
+    "status": "live",
+    "thumbnail_url": "https://cdn.loco.example/thumbs/abc123.jpg",
+    "embed_code": "<iframe src=\"https://embed.loco.example/player/abc123?key=eyJ...\" width=\"640\" height=\"360\" frameborder=\"0\" allowfullscreen></iframe>"
+  }
+]
+```
+ 
+##### Implementation Notes
+ 
+- **embed_code format:** The returned `embed_code` is a complete HTML `<iframe>` string—use it as-is without modification
+- **Status filtering:** Operators may choose to display only `live` streams or show offline streams with a "replay" badge
+- **Thumbnail fallback:** Use `thumbnail_url` if you want to show a preview before the player loads
+- **Refresh interval:** Call this endpoint every 30-60 seconds to keep the stream list current
+- **Caching:** For performance, cache responses for 5-10 seconds before the next refresh call
+
+---
+ 
+<a name="53-frontend-integration"></a>
+### 5.3 Frontend Integration & Customization
+ 
+#### 5.3.1 Rendering Embed Code
+ 
+**Overview:**
+ 
+The Feed API returns each stream with an `embed_code` field a complete HTML `<iframe>` string. Simply render this code as-is in your UI. Do not attempt to parse or reconstruct the iframe; Loco maintains the URL format and parameters.
+ 
+---
+ 
+#### 5.3.2 Query Parameters & Customization
+ 
+**Overview:**
+ 
+You can customize player behavior and appearance by appending query parameters to the iframe `src` URL. Use a helper function to inject parameters into the `embed_code`.
+ 
+##### Supported Query Parameters
+ 
+| Parameter | Values | Purpose | Example Use Case |
+|-----------|--------|---------|------------------|
+| `controls` | `false` \| `true` | Hide/show player control bar | `controls=false` for clean, view-only display |
+| `muted` | `true` \| `false` | Start stream muted or with audio | `muted=true` for autoplay grids (avoid audio overlap) |
+ 
+##### Helper Function (React)
+ 
+```tsx
+function addQueryParams(embedCode: string, params: Record<string, string>) {
+  return embedCode.replace(
+    /src="([^"]+)"/,
+    (_match, src) => {
+      const url = new URL(src);
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
+      });
+      return `src="${url.toString()}"`;
+    }
+  );
+}
+ 
+// Usage
+const customizedEmbed = addQueryParams(stream.embed_code, {
+  controls: 'false',
+  muted: 'true'
+});
+```
+ 
+##### Rendering with Custom Parameters
+ 
+```jsx
+// React
+function LiveStream({ stream }) {
+  const customizedEmbed = addQueryParams(stream.embed_code, {
+    controls: 'false',
+    muted: 'true'
+  });
+  
+  return (
+    <div
+      className="stream-player"
+      dangerouslySetInnerHTML={{ __html: customizedEmbed }}
+    />
+  );
+}
+```
+ 
+##### Parameter Examples
+ 
+**Example 1: View-only stream (no controls, muted)**
+```
+Original embed_code:
+<iframe src="https://embed.loco.example/player/abc123?key=..." width="640" height="360"></iframe>
+ 
+With parameters (controls=false, muted=true):
+<iframe src="https://embed.loco.example/player/abc123?key=...&controls=false&muted=true" width="640" height="360"></iframe>
+```
+ 
+**Example 2: Interactive stream (with controls, audio enabled)**
+```
+<iframe src="https://embed.loco.example/player/abc123?key=...&controls=true&muted=false" width="640" height="360"></iframe>
+```
+ 
 ---
