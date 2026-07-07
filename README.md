@@ -94,7 +94,7 @@ The operator must expose a **user-facing redirect URL** that Loco will use to re
 #### Redirect URL Format
 
 ```
-https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=march_2026_drops&txn_id=txn_20260304_004&op_type=bonus&op_type_id=bundle_001&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=march_2026_drops&txn_id=txn_20260304_004&op_type=bonus_drops&op_type_id=bundle_001&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
 ```
 
 #### Required Parameters
@@ -106,13 +106,13 @@ https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_ui
 | utm_loco_uname | `string` | ✅ Yes | Loco username |
 | utm_campaign | `string` | ✅ Yes | Campaign identifier for tracking |
 | txn_id | `string` | ✅ Yes | Unique transaction ID for idempotency |
-| op_type | `string` | ✅ Yes | Operation type: `"bonus"`, `"drop"` |
+| op_type | `string` | ✅ Yes | Operation type: `"bonus_drops"` |
 | op_type_id | `string` | ✅ Yes | Reward ID or bundle ID |
 | ts | `integer` | ✅ Yes | Unix timestamp (seconds) |
 | sig | `string` | ✅ Yes | HMAC-SHA256 signature for request validation |
 
 > **NOTE:**  
-> For Drops/Rewards integrations, `op_type` will be `"bonus"` or `"drop"`, and `op_type_id` corresponds to the specific reward identifier. These values along with `txn_id` are used for tracking and must be passed back to Loco in Step 4.
+> For Drops/Rewards integrations, `op_type` will be `"bonus_drops"`, and `op_type_id` corresponds to the specific reward identifier. These values along with `txn_id` are used for tracking and must be passed back to Loco in Step 4.
 
 ---
 
@@ -373,7 +373,7 @@ Similar to Drops/Rewards, the operator must expose a **user-facing redirect URL*
 #### Redirect URL Format
 
 ```
-https://<operator-redirect-endpoint>/casino/tournament?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=weekly_tournament&txn_id=txn_20260304_005&op_type=tournament&op_type_id=tourn_2024_001&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=weekly_tournament&txn_id=txn_20260304_005&op_type=tournament&op_type_id=tourn_2024_001&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
 ```
 
 #### Required Parameters
@@ -818,7 +818,7 @@ Similar to Drops/Rewards and Battles, the operator must expose a **user-facing r
 #### Redirect URL Format
 
 ```
-https://<operator-redirect-endpoint>/casino/play?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=loco_play&txn_id=txn_20260304_007&op_type=loco_play&op_type_id=game_12345&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+https://<operator-redirect-endpoint>/casino/register?utm_source=loco&utm_loco_uid=loco_12345678&utm_loco_uname=gamer123&utm_campaign=loco_play&txn_id=txn_20260304_007&op_type=loco_play&op_type_id=game_12345&ts=1709548800&sig=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
 ```
 
 #### Required Parameters
@@ -1106,6 +1106,7 @@ GET /api/v1/operator/feed/
 | id | `string` | ✅ Yes | Unique stream identifier | `"stream_abc123"` |
 | title | `string` | ✅ Yes | Stream display title | `"Evening Roulette Live"` |
 | streamer_name | `string` | ✅ Yes | Host/streamer name | `"LocoHost_01"` |
+| streamer_image | `string` | ✅ Yes | Host/streamer avatar | `"https://cdn.loco.example/avatar/abc123.jpg"` |
 | status | `enum` | ✅ Yes | Current stream status | `live` \| `offline`  |
 | thumbnail_url | `string (URL)` | ✅ Yes | Stream thumbnail (can be shown before stream loads; 640x360px recommended) | `"https://cdn.loco.example/thumbs/abc123.jpg"` |
 | embed_code | `string` | ✅ Yes | Complete `<iframe>` HTML snippet (ready to use in UI) | `"<iframe src=\"https://embed.loco.example/player/abc123?key=...\" width=\"640\" height=\"360\" frameborder=\"0\" allowfullscreen></iframe>"` |
@@ -1118,6 +1119,7 @@ GET /api/v1/operator/feed/
     "id": "stream_abc123",
     "title": "Evening Roulette Live",
     "streamer_name": "LocoHost_01",
+    "streamer_image": "https://cdn.loco.example/avatar/abc123.png",
     "status": "live",
     "thumbnail_url": "https://cdn.loco.example/thumbs/abc123.jpg",
     "embed_code": "<iframe src=\"https://embed.loco.example/player/abc123?key=eyJ...\" width=\"640\" height=\"360\" frameborder=\"0\" allowfullscreen></iframe>"
@@ -1128,7 +1130,6 @@ GET /api/v1/operator/feed/
 ##### Implementation Notes
  
 - **embed_code format:** The returned `embed_code` is a complete HTML `<iframe>` string—use it as-is without modification
-- **Status filtering:** Operators may choose to display only `live` streams or show offline streams with a "replay" badge
 - **Thumbnail fallback:** Use `thumbnail_url` if you want to show a preview before the player loads
 - **Refresh interval:** Call this endpoint every 30-60 seconds to keep the stream list current
 - **Caching:** For performance, cache responses for 5-10 seconds before the next refresh call
@@ -1216,5 +1217,8 @@ With parameters (controls=false, muted=true):
 ```
 <iframe src="https://embed.loco.example/player/abc123?key=...&controls=true&muted=false" width="640" height="360"></iframe>
 ```
- 
+
 ---
+
+**NOTE:**  
+Once integration is complete for any feature, the operator will be provided access to the Loco Partner Portal to configure and manage campaigns.
